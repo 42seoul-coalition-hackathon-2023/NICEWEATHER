@@ -7,8 +7,10 @@ export class MainController {
     constructor(private mainService: MainService) {}
 
     @Get('/')
-    home() {
-        return this.mainService.getWeatherData();
+    async home() {
+        const ret = await this.mainService.getWeatherData();
+        console.log(ret);
+        return ret;
     }
     
     @Cron('* */5 * * * *')
