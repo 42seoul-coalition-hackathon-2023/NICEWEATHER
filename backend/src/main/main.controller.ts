@@ -8,11 +8,11 @@ export class MainController {
 
     @Get('/')
     async home() {
-        return await this.mainService.getWeatherData();
+        return await this.mainService.getWeatherData(new Date(Date.now()));
     }
 
     @Cron('* */5 * * * *')
     async updateData() {
-        await this.mainService.getApi();
+        await this.mainService.getApi(new Date(Date.now()));
     }
 }

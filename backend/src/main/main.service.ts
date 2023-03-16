@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Weather } from './main.entity';
 import { Repository } from 'typeorm';
+import { number } from 'joi';
 
 @Injectable()
 export class MainService {
@@ -28,102 +29,37 @@ export class MainService {
         return response.data.access_token;
     }
 
-    calculateDate(year, month, day, time) {
-        var ts;
-        var day_of_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-        if (time < 0) {
-            time += 24;
-            day -= 1;
-            if (day <= 0) {
-                month -= 1;
-                if (month <= 0) {
-                    month = 12;
-                    year -= 1;
-                }
-                else if (month == 2) {
-                    if (year % 4 == 0) {
-                        if (year % 100 == 0) {
-                            if (year % 400 == 0)
-                                day = 29;
-                            else
-                                day = 28;
-                        }
-                        else
-                            day = 29;
-                    }
-                    else
-                        day = 28;
-                }
-                else
-                    day = day_of_month[month - 1];
-            }
-        }
-        ts = time.toString();
-        if (ts.length == 1)
-            ts = '0' + ts;
-        return year.toString() + '-' + month.toString() + '-' + day.toString() + 'T' + ts;
+    dateTimeMove(date: Date, time_move: number): Date {
+        let new_date = new Date(date.getTime() + (1000 * 60 * 60 * time_move))
+        return new_date;
     }
 
-    async getApi() {
-        var now_date = new Date(Date.now()).toLocaleDateString();
-        var now_time = new Date(Date.now()).toLocaleTimeString();
-        var s = now_date.split('/');
-        var t = now_time.split(':');
-        var date = s[2] + '-' + s[0] + '-' + s[1];
-        var time = parseInt(t[0]);
-        if (t[2][3] === 'P')
-        time += 12;
-        var splited = date.split('-');
-        var year = parseInt(splited[0]);
-        var month = parseInt(splited[1]);
-        var day = parseInt(splited[2]);
+    getFormattedDate(date: Date): string {
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        let hour = date.getHours();
+        let min = date.getMinutes();
+        let str = [year, month, day].join('-') + 'T'
+            + [hour, min, 0].join(':') + '.000Z';
+        return str;
+    }
+
+    async getApi(date: Date) {
         const token = await this.getAccessToken();
-
-        time -= 7;
-        for (var i = 0; i < 6; i++) {
-            var curr = this.calculateDate(year, month, day, time);
-            const url = this.configService.get('API_URL')
-                + '?filter[campus_id]=29' 
-                + `&range[begin_at]=${curr}:00:00.000Z,${curr}:45:00.000Z`;
-            const headers = { 'Authorization': `Bearer ${token}` };
-            const response = await this.httpService.get(url, {headers}).toPromise();
-            const new_data = this.weatherRepository.create({
-                time: this.calculateDate(year, month, day, time + 9),
-                count: Object.keys(response.data).length
-            });
-            await this.weatherRepository.save(new_data);
-            time -= 1;
-        }
-    }
-
-    async getWeatherData() {
-        var now_date = new Date(Date.now()).toLocaleDateString();
-        var now_time = new Date(Date.now()).toLocaleTimeString();
-        var s = now_date.split('/');
-        var t = now_time.split(':');
-        var date = s[2] + '-' + s[0] + '-' + s[1];
-        var time = parseInt(t[0]) + 2;
-        if (t[2][3] === 'P')
-            time += 12;
-        var splited = date.split('-');
-        var year = parseInt(splited[0]);
-        var month = parseInt(splited[1]);
-        var day = parseInt(splited[2]);
-        var ret = {};
+        const headers = { 'Authorization': `Bearer ${token}` };
         
-        for (var i = 0; i < 6; i++) {
-            var curr = this.calculateDate(year, month, day, time);
-            var found = await this.weatherRepository.findOneBy({time: curr});
-            if (!found)
-                await this.getApi();
-            splited = curr.split('-');
-            year = parseInt(splited[0]);
-            month = parseInt(splited[1]);
-            day = parseInt(splited[2]);
-            var ret_date = new Date(year, month - 1, day, time, 0, 0,0);
-            var level;
-            var count = found.count;
+        console.log((date) + ' : get api');
+        date = this.dateTimeMove(date, -3);
+        for (let i = 0; i < 6; i++) {
+            date.setMinutes(0, 0, 0);
+            let from = this.getFormattedDate(this.dateTimeMove(date, -9));
+            date.setMinutes(45, 0, 0);
+            let to = this.getFormattedDate(this.dateTimeMove(date, -9));
+            const url = this.configService.get('API_URL') + '?filter[campus_id]=29' + `&range[begin_at]=${from},${to}`;
+            const response = await this.httpService.get(url, {headers}).toPromise();
+            let count = Object.keys(response.data).length;
+            let level: number;
             if (count < 30)
                 level = 1;
             else if (count < 60)
@@ -132,12 +68,38 @@ export class MainService {
                 level = 3;
             else
                 level = 4;
+            let found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+            if (!found)
+                await this.weatherRepository.delete({time: this.getFormattedDate(date)});
+            const new_data = this.weatherRepository.create({
+                time: this.getFormattedDate(date),
+                count: count,
+                level: level
+            });
+            await this.weatherRepository.save(new_data);
+            date = this.dateTimeMove(date, 1);
+        }
+    }
+
+    async getWeatherData(date: Date) {
+        let ret = {};
+        
+        date.setMinutes(45, 0, 0);
+        console.log((date) + ' : get weather data');
+        let found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+        if (!found) {
+            await this.getApi(date);
+            found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+        }
+        date = this.dateTimeMove(date, -3);
+        for (let i = 0; i < 6; i++) {
+            let found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
             ret[i] = {
-                ret_date,
-                level,
-                count,
+                date: found.time,
+                level: found.level,
+                count: found.count,
             }
-            time -= 1;
+            date = this.dateTimeMove(date, 1);
         }
         return ret;
     }
