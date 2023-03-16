@@ -7,12 +7,12 @@ export class MainController {
     constructor(private mainService: MainService) {}
 
     @Get('/')
-    home() {
-        return this.mainService.getWeatherData();
+    async home() {
+        return await this.mainService.getWeatherData();
     }
-    
+
     @Cron('* */5 * * * *')
-    updateData() {
-        this.mainService.getApi();
+    async updateData() {
+        await this.mainService.getApi();
     }
 }

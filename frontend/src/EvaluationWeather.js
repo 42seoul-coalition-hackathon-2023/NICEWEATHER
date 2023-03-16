@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import axios from 'axios';
 
 function Copyright() {
   return (
@@ -28,6 +29,24 @@ const cards = [1, 2, 3, 4, 5, 6];
 const theme = createTheme();
 
 export default function EvaluationWeather() {
+  const [weatherList, SetWeatherList] = useState(null);
+
+  const fetchData = async () => {
+    const response = await axios.get('http://localhost:4000/main/')
+    console.log(response);
+    console.log(response.data);
+    SetWeatherList(response.data);
+    console.log("weatherList should print inside")
+    console.log(weatherList);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  
+  console.log("weatherList print outside")
+  console.log(weatherList);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
