@@ -8,9 +8,7 @@ export class MainController {
 
     @Get('/')
     async home() {
-        const ret = await this.mainService.getWeatherData();
-        console.log(ret);
-        return ret;
+        return await this.mainService.getWeatherData();
     }
     
     @Cron('* */5 * * * *')
