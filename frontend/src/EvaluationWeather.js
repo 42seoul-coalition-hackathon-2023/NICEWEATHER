@@ -123,10 +123,19 @@ export default function EvaluationWeather() {
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h2">
-                      {new Date(weatherInfo[1].ret_date).getHours() + "시"}
+                      {
+                        // weatherInfo[1].date
+                        // new Date(weatherInfo[1].date)
+                        new Date(weatherInfo[1].date).getMonth() + 1 + "월 " + 
+                        new Date(weatherInfo[1].date).getDate() + "일 " + 
+                        new Date(weatherInfo[1].date).getHours() + "시"
+                      }
                     </Typography>
                     <Typography>
                       {"level: " + weatherInfo[1].level}
+                    </Typography>
+                    <Typography>
+                      {"count: " + weatherInfo[1].count}
                     </Typography>
                   </CardContent>
                 </Card>
