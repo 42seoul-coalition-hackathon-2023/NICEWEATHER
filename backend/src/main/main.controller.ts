@@ -10,9 +10,9 @@ export class MainController {
     async home() {
         return await this.mainService.getWeatherData();
     }
-    
+
     @Cron('* */5 * * * *')
-    updateData() {
-        this.mainService.getApi();
+    async updateData() {
+        await this.mainService.getApi();
     }
 }

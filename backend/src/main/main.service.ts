@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Weather } from './main.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MainService {
-    constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {}
-    private data = {};
+    constructor(
+        private readonly httpService: HttpService,
+        private readonly configService: ConfigService,
+        @InjectRepository(Weather)
+        private weatherRepository: Repository<Weather> 
+    ) {}
 
     async getAccessToken() {
         const url = this.configService.get('TOKEN_URL');
@@ -29,7 +36,12 @@ export class MainService {
             time += 24;
             day -= 1;
             if (day <= 0) {
-                if (month - 1 == 2) {
+                month -= 1;
+                if (month <= 0) {
+                    month = 12;
+                    year -= 1;
+                }
+                else if (month == 2) {
                     if (year % 4 == 0) {
                         if (year % 100 == 0) {
                             if (year % 400 == 0)
@@ -44,12 +56,7 @@ export class MainService {
                         day = 28;
                 }
                 else
-                    day = day_of_month[month - 2];
-                month -= 1;
-                if (month <= 0) {
-                    month = 12;
-                    year -= 1;
-                }
+                    day = day_of_month[month - 1];
             }
         }
         ts = time.toString();
@@ -76,14 +83,16 @@ export class MainService {
         time -= 7;
         for (var i = 0; i < 6; i++) {
             var curr = this.calculateDate(year, month, day, time);
-            if (this.data[curr])
-                continue;
             const url = this.configService.get('API_URL')
                 + '?filter[campus_id]=29' 
                 + `&range[begin_at]=${curr}:00:00.000Z,${curr}:45:00.000Z`;
             const headers = { 'Authorization': `Bearer ${token}` };
             const response = await this.httpService.get(url, {headers}).toPromise();
-            this.data[this.calculateDate(year, month, day, time + 9)] = Object.keys(response.data).length;
+            const new_data = this.weatherRepository.create({
+                time: this.calculateDate(year, month, day, time + 9),
+                count: Object.keys(response.data).length
+            });
+            await this.weatherRepository.save(new_data);
             time -= 1;
         }
     }
@@ -94,7 +103,7 @@ export class MainService {
         var s = now_date.split('/');
         var t = now_time.split(':');
         var date = s[2] + '-' + s[0] + '-' + s[1];
-        var time = parseInt(t[0]);
+        var time = parseInt(t[0]) + 2;
         if (t[2][3] === 'P')
             time += 12;
         var splited = date.split('-');
@@ -102,13 +111,32 @@ export class MainService {
         var month = parseInt(splited[1]);
         var day = parseInt(splited[2]);
         var ret = {};
-        var curr = this.calculateDate(year, month, day, time);
-        if (!this.data[curr])
-            await this.getApi();
         
         for (var i = 0; i < 6; i++) {
-            curr = this.calculateDate(year, month, day, time + 2);
-            ret[curr] = this.data[curr];
+            var curr = this.calculateDate(year, month, day, time);
+            var found = await this.weatherRepository.findOneBy({time: curr});
+            if (!found)
+                await this.getApi();
+            splited = curr.split('-');
+            year = parseInt(splited[0]);
+            month = parseInt(splited[1]);
+            day = parseInt(splited[2]);
+            var ret_date = new Date(year, month - 1, day, time, 0, 0,0);
+            var level;
+            var count = found.count;
+            if (count < 30)
+                level = 1;
+            else if (count < 60)
+                level = 2;
+            else if (count < 100)
+                level = 3;
+            else
+                level = 4;
+            ret[i] = {
+                ret_date,
+                level,
+                count,
+            }
             time -= 1;
         }
         return ret;
