@@ -86,11 +86,12 @@ export class MainService {
         
         date.setMinutes(45, 0, 0);
         console.log((date) + ' : get weather data');
-        let found = await this.weatherRepository.findOneBy({time: date});
-        if (!found) {
-            await this.getApi(date);
-            found = await this.weatherRepository.findOneBy({time: date});
-        }
+        let found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, -3)});
+        if (!found)
+            await this.getApi(this.dateTimeMove(date, -3));
+        found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, 2)});
+        if (!found)
+            await this.getApi(this.dateTimeMove(date, 2));
         date = this.dateTimeMove(date, -3);
         for (let i = 0; i < 6; i++) {
             let found = await this.weatherRepository.findOneBy({time: date});
