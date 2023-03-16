@@ -8,7 +8,7 @@ export class Weather {
 
     @Column()
     @NotEquals(null)
-    time: string;
+    time: Date;
 
     @Column()
     @NotEquals(null)

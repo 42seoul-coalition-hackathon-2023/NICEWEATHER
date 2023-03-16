@@ -68,11 +68,11 @@ export class MainService {
                 level = 3;
             else
                 level = 4;
-            let found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+            let found = await this.weatherRepository.findOneBy({time: date});
             if (!found)
-                await this.weatherRepository.delete({time: this.getFormattedDate(date)});
+                await this.weatherRepository.delete({time: date});
             const new_data = this.weatherRepository.create({
-                time: this.getFormattedDate(date),
+                time: date,
                 count: count,
                 level: level
             });
@@ -86,14 +86,14 @@ export class MainService {
         
         date.setMinutes(45, 0, 0);
         console.log((date) + ' : get weather data');
-        let found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+        let found = await this.weatherRepository.findOneBy({time: date});
         if (!found) {
             await this.getApi(date);
-            found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+            found = await this.weatherRepository.findOneBy({time: date});
         }
         date = this.dateTimeMove(date, -3);
         for (let i = 0; i < 6; i++) {
-            let found = await this.weatherRepository.findOneBy({time: this.getFormattedDate(date)});
+            let found = await this.weatherRepository.findOneBy({time: date});
             ret[i] = {
                 date: found.time,
                 level: found.level,
