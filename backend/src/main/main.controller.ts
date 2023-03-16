@@ -8,13 +8,9 @@ export class MainController {
 
     @Get('/')
     async home() {
-<<<<<<< Updated upstream
         const ret = await this.mainService.getWeatherData();
         console.log(ret);
         return ret;
-=======
-        return await this.mainService.getWeatherData();
->>>>>>> Stashed changes
     }
 
     @Cron('* */5 * * * *')
