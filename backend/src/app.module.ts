@@ -8,8 +8,8 @@ import { Weather } from './main/main.entity';
 
 @Module({
   imports: [
+    MainModule,
     TypeOrmModule.forRoot(typeORMConfig),
-    TypeOrmModule.forFeature([Weather]),
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         TOKEN_URL: Joi.string().required(),
@@ -21,8 +21,7 @@ import { Weather } from './main/main.entity';
         REDIRECT_URL: Joi.string().required(),
         SCOPE: Joi.string().required(),
       }),
-  }),
-  MainModule
+    }),
   ],
 })
 export class AppModule {}

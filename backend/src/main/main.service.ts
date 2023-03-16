@@ -36,7 +36,12 @@ export class MainService {
             time += 24;
             day -= 1;
             if (day <= 0) {
-                if (month - 1 == 2) {
+                month -= 1;
+                if (month <= 0) {
+                    month = 12;
+                    year -= 1;
+                }
+                else if (month == 2) {
                     if (year % 4 == 0) {
                         if (year % 100 == 0) {
                             if (year % 400 == 0)
@@ -51,12 +56,7 @@ export class MainService {
                         day = 28;
                 }
                 else
-                    day = day_of_month[month - 2];
-                month -= 1;
-                if (month <= 0) {
-                    month = 12;
-                    year -= 1;
-                }
+                    day = day_of_month[month - 1];
             }
         }
         ts = time.toString();
@@ -83,9 +83,6 @@ export class MainService {
         time -= 7;
         for (var i = 0; i < 6; i++) {
             var curr = this.calculateDate(year, month, day, time);
-            const found = await this.weatherRepository.findOne({where: {time: curr}});
-            if (found && i > 2)
-                continue;
             const url = this.configService.get('API_URL')
                 + '?filter[campus_id]=29' 
                 + `&range[begin_at]=${curr}:00:00.000Z,${curr}:45:00.000Z`;
@@ -106,7 +103,7 @@ export class MainService {
         var s = now_date.split('/');
         var t = now_time.split(':');
         var date = s[2] + '-' + s[0] + '-' + s[1];
-        var time = parseInt(t[0]);
+        var time = parseInt(t[0]) + 2;
         if (t[2][3] === 'P')
             time += 12;
         var splited = date.split('-');
@@ -114,15 +111,32 @@ export class MainService {
         var month = parseInt(splited[1]);
         var day = parseInt(splited[2]);
         var ret = {};
-        var curr = this.calculateDate(year, month, day, time);
-        var found = await this.weatherRepository.findOneBy({time: curr});
-        if (!found)
-            await this.getApi();
         
         for (var i = 0; i < 6; i++) {
-            curr = this.calculateDate(year, month, day, time);
-            found = await this.weatherRepository.findOneBy({time: curr});
-            ret[curr] = found.count;
+            var curr = this.calculateDate(year, month, day, time);
+            var found = await this.weatherRepository.findOneBy({time: curr});
+            if (!found)
+                await this.getApi();
+            splited = curr.split('-');
+            year = parseInt(splited[0]);
+            month = parseInt(splited[1]);
+            day = parseInt(splited[2]);
+            var ret_date = new Date(year, month - 1, day, time, 0, 0,0);
+            var level;
+            var count = found.count;
+            if (count < 30)
+                level = 1;
+            else if (count < 60)
+                level = 2;
+            else if (count < 100)
+                level = 3;
+            else
+                level = 4;
+            ret[i] = {
+                ret_date,
+                level,
+                count,
+            }
             time -= 1;
         }
         return ret;
