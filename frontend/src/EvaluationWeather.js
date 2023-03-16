@@ -24,28 +24,54 @@ function Copyright() {
   );
 }
 
+function getPhotoLinkByLevel(level) {
+  let ret;
+  if (level === 1)
+    ret = "https://source.unsplash.com/random/300x300/?desert?branch";
+  else if (level === 2)
+    ret = "https://source.unsplash.com/random/300x300/?dry";
+  else if (level === 3)
+    ret = "https://source.unsplash.com/random/300x300/?tree";
+  else if (level === 4)
+    ret = "https://source.unsplash.com/random/300x300/?fine";
+  return ret;
+}
+
 const cards = [1, 2, 3, 4, 5, 6];
 
 const theme = createTheme();
 
 export default function EvaluationWeather() {
-  const [weatherList, SetWeatherList] = useState(null);
+  const [weathers, SetWeathers] = useState([]);
 
   const fetchData = async () => {
     const response = await axios.get('http://localhost:4000/main/')
     console.log(response);
     console.log(response.data);
-    SetWeatherList(response.data);
-    console.log("weatherList should print inside")
-    console.log(weatherList);
+    SetWeathers(response.data);
+    console.log("weathers should print inside")
+    console.log(weathers);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
   
-  console.log("weatherList print outside")
-  console.log(weatherList);
+  console.log("weathers print outside")
+  console.log(weathers);
+
+  const weatherInfos = Object.entries(weathers);
+  console.log(weatherInfos);
+
+
+  // for (const property in weathers) {
+  //   console.log(`${property}: ${weathers[property]}`);
+  //   console.log(weathers[property]);
+  // }
+  // weathers.forEach(element => console.log(element));
+  // weathers.map(item => (
+  //   console.log(item)
+  // ));
 
   return (
     <ThemeProvider theme={theme}>
@@ -67,7 +93,7 @@ export default function EvaluationWeather() {
               color="text.primary"
               gutterBottom
             >
-              NICE WEATHER EMA
+              NICE WEATHER
             </Typography>
             <Typography variant="h5" align="center" color="text.secondary" paragraph>
               42seoul Evaluation Meteorological Administration
@@ -77,8 +103,8 @@ export default function EvaluationWeather() {
         <Container sx={{ py: 8 }} maxWidth="xl">
           {/* End hero unit */}
           <Grid container spacing={2}>
-            {cards.map((card) => (
-              <Grid item key={card} xs={12} sm={2} md={2}>
+            {weatherInfos.map((weatherInfo) => (
+              <Grid item key={weatherInfo[0]} xs={12} sm={2} md={2}>
                 <Card
                   sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
@@ -88,15 +114,19 @@ export default function EvaluationWeather() {
                       // 16:9
                       //pt: '56.25%',
                     }}
-                    image="https://source.unsplash.com/random/300x300/?desert?branch"
+                    image={
+                        // user function
+                        getPhotoLinkByLevel(weatherInfo[1].level)
+                        //"https://source.unsplash.com/random/300x300/?desert?branch"
+                      }
                     alt="random"
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h2">
-                      13:35
+                      {new Date(weatherInfo[1].ret_date).getHours() + "시"}
                     </Typography>
                     <Typography>
-                      Drought!
+                      {"level: " + weatherInfo[1].level}
                     </Typography>
                   </CardContent>
                 </Card>
