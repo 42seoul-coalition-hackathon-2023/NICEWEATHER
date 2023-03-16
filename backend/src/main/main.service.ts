@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Weather } from './main.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MainService {
-    constructor(private readonly httpService: HttpService, private readonly configService: ConfigService) {}
-    private data = {};
+    constructor(
+        private readonly httpService: HttpService,
+        private readonly configService: ConfigService,
+        @InjectRepository(Weather)
+        private weatherRepository: Repository<Weather> 
+    ) {}
 
     async getAccessToken() {
         const url = this.configService.get('TOKEN_URL');
@@ -76,14 +83,19 @@ export class MainService {
         time -= 7;
         for (var i = 0; i < 6; i++) {
             var curr = this.calculateDate(year, month, day, time);
-            if (this.data[curr])
+            const found = await this.weatherRepository.findOne({where: {time: curr}});
+            if (found && i > 2)
                 continue;
             const url = this.configService.get('API_URL')
                 + '?filter[campus_id]=29' 
                 + `&range[begin_at]=${curr}:00:00.000Z,${curr}:45:00.000Z`;
             const headers = { 'Authorization': `Bearer ${token}` };
             const response = await this.httpService.get(url, {headers}).toPromise();
-            this.data[this.calculateDate(year, month, day, time + 9)] = Object.keys(response.data).length;
+            const new_data = this.weatherRepository.create({
+                time: this.calculateDate(year, month, day, time + 9),
+                count: Object.keys(response.data).length
+            });
+            await this.weatherRepository.save(new_data);
             time -= 1;
         }
     }
@@ -103,12 +115,14 @@ export class MainService {
         var day = parseInt(splited[2]);
         var ret = {};
         var curr = this.calculateDate(year, month, day, time);
-        if (!this.data[curr])
+        var found = await this.weatherRepository.findOneBy({time: curr});
+        if (!found)
             await this.getApi();
         
         for (var i = 0; i < 6; i++) {
-            curr = this.calculateDate(year, month, day, time + 2);
-            ret[curr] = this.data[curr];
+            curr = this.calculateDate(year, month, day, time);
+            found = await this.weatherRepository.findOneBy({time: curr});
+            ret[curr] = found.count;
             time -= 1;
         }
         return ret;
