@@ -46,32 +46,15 @@ export default function EvaluationWeather() {
 
   const fetchData = async () => {
     const response = await axios.get('http://localhost:4000/main/')
-    console.log(response);
-    console.log(response.data);
     SetWeathers(response.data);
-    console.log("weathers should print inside")
-    console.log(weathers);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
-  
-  console.log("weathers print outside")
-  console.log(weathers);
 
   const weatherInfos = Object.entries(weathers);
   console.log(weatherInfos);
-
-
-  // for (const property in weathers) {
-  //   console.log(`${property}: ${weathers[property]}`);
-  //   console.log(weathers[property]);
-  // }
-  // weathers.forEach(element => console.log(element));
-  // weathers.map(item => (
-  //   console.log(item)
-  // ));
 
   return (
     <ThemeProvider theme={theme}>
@@ -115,17 +98,13 @@ export default function EvaluationWeather() {
                       //pt: '56.25%',
                     }}
                     image={
-                        // user function
                         getPhotoLinkByLevel(weatherInfo[1].level)
-                        //"https://source.unsplash.com/random/300x300/?desert?branch"
                       }
                     alt="random"
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h2">
                       {
-                        // weatherInfo[1].date
-                        // new Date(weatherInfo[1].date)
                         new Date(weatherInfo[1].date).getMonth() + 1 + "월 " + 
                         new Date(weatherInfo[1].date).getDate() + "일 " + 
                         new Date(weatherInfo[1].date).getHours() + "시"
