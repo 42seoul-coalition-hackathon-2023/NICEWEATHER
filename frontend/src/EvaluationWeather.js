@@ -86,12 +86,11 @@ export default function EvaluationWeather() {
   const handleFormSubmit = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const evaluationData = {
-      email: formData.get('email'),
-      rating: formData.get('rating'),
-      date: new Date(),
+    const reservationData = {
+      time: new Date(selectedWeatherInfo?.[1]?.date),
+      mail: formData.get('email'),
     };
-    // TODO: Send evaluationData to backend API
+    const responseOfPost = axios.post('http://localhost:4000/main/', reservationData);
     handleCloseDialog();
   };
 
