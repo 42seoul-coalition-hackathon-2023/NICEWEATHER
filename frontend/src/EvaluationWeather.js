@@ -165,9 +165,13 @@ export default function EvaluationWeather() {
           </Grid>
         </Container>
         <Dialog open={openDialog} onClose={handleCloseDialog}>
-          <DialogTitle>{"Enter your evaluation"}</DialogTitle>
+          <DialogTitle>{"평가 알림 신청"}</DialogTitle>
           <DialogContent>
             <form onSubmit={handleFormSubmit}>
+              <Typography variant="subtitle1" gutterBottom>
+                {"Selected time: " +
+                  new Date(selectedWeatherInfo?.[1]?.date).toLocaleString()}
+              </Typography>
               <TextField
                 label="Your email"
                 fullWidth
