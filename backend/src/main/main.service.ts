@@ -128,8 +128,7 @@ export class MainService {
                     to: email,
                     subject: '42Weather Slot alarm',
                     text: 'New slot is opened on ' 
-                        + date.toDateString()
-                        + date.getHours()
+                        + this.getFormattedDate(date)
                         + '!!!',
                 };
                 transporter.sendMail(mailOptions, function(err, info) {
