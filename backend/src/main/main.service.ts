@@ -127,7 +127,7 @@ export class MainService {
                 let mailOptions = {
                     to: email,
                     subject: '42Weather Slot alarm',
-                    text: 'New slot is opened at ' 
+                    text: 'New slot has opened at ' 
                         + (date.getMonth() + 1) + '/'
                         + date.getDate() + ' '
                         + date.getHours(),
