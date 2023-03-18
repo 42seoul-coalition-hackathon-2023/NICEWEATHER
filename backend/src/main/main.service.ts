@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -76,32 +76,27 @@ export class MainService {
         return expression.test(mail);
     }
 
-    async setAlarm(mail: string, time: Date) {
-        let ret = {};
+    async checkAlarmValidation(mail: string, time: Date) {
         let now = new Date(Date.now())
 
         now.setMinutes(0, 0, 0);
-        time.setMinutes(0, 0, 0);
         if (!this.checkMailFormat(mail)) {
-            ret['error'] = 'Setting alarm fail';
-            ret['message'] = 'e-mail format is incorrect';
             console.log(now + ' : set alarm error(e-mail format)' + mail);
-            return ret;
+            return 'e-mail format is incorrect';
         }
         if (time <= now) {
-            ret['error'] = 'Setting alarm fail';
-            ret['message'] = `Can't be set alarm on past time`;
             console.log(now + ' : set alarm error(past time)' + time);
-            return ret;
+            return `Can't be set alarm on past time`;
         }
         let founds = await this.mailRepository.findBy({mail: mail});
         if (founds && founds.filter((alarm) => alarm.time === time).length != 0) {
-            ret['error'] = 'Setting alarm fail';
-            ret['message'] = 'Already be set on the time as same e-mail';
             console.log(now + ' : set alarm error(duplication)');
-            return ret;
+            return 'Already be set on the time as same e-mail';
         }
-        console.log(now + ' : set alarm');
+        return null;
+    }
+
+    async setAlarm(mail: string, time: Date) {
         await this.mailRepository.save({mail: mail, time: time});
         console.log('\tset alarm at ' + mail + ' on ' + time);
     }
