@@ -127,9 +127,10 @@ export class MainService {
                 let mailOptions = {
                     to: email,
                     subject: '42Weather Slot alarm',
-                    text: 'New slot is opened on ' 
-                        + this.getFormattedDate(date)
-                        + '!!!',
+                    text: 'New slot is opened at ' 
+                        + (date.getMonth() + 1) + '/'
+                        + date.getDate() + ' '
+                        + date.getHours(),
                 };
                 transporter.sendMail(mailOptions, function(err, info) {
                     if (err)
@@ -167,7 +168,7 @@ export class MainService {
             let last_slot = this.getLastSlot(response.data);
             let found = await this.weatherRepository.findOneBy({time: date});
             if (found) {
-                // if (last_slot > found.last_slot)
+                if (last_slot > found.last_slot)
                     this.sendMail(date);
                 await this.weatherRepository.delete({time: date});
             }
