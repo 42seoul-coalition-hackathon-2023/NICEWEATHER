@@ -66,16 +66,35 @@ export default function EvaluationWeather() {
 
 
   const [openDialog, setOpenDialog] = useState(false);
-  // const [selectedWeatherInfo, setSelectedWeatherInfo] = useState(null);
+  const [selectedWeatherInfo, setSelectedWeatherInfo] = useState(null);
 
   const handleGridItemClick = (weatherInfo) => {
-    // setSelectedWeatherInfo(weatherInfo);
+    setSelectedWeatherInfo(weatherInfo);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+
+  const [email, setEmail] = useState('');
+
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const evaluationData = {
+      email: formData.get('email'),
+      rating: formData.get('rating'),
+      date: new Date(),
+    };
+    // TODO: Send evaluationData to backend API
+    handleCloseDialog();
+  };
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -148,11 +167,20 @@ export default function EvaluationWeather() {
         <Dialog open={openDialog} onClose={handleCloseDialog}>
           <DialogTitle>{"Enter your evaluation"}</DialogTitle>
           <DialogContent>
-            <TextField label="Your name" fullWidth margin="normal" />
-            <TextField label="Evaluation" fullWidth margin="normal" />
-            <Button variant="contained" color="primary" fullWidth>
-              Submit
-            </Button>
+            <form onSubmit={handleFormSubmit}>
+              <TextField
+                label="Your email"
+                fullWidth
+                margin="normal"
+                value={email}
+                onChange={handleEmailChange}
+              />
+              {/* <TextField label="Your name" fullWidth margin="normal" /> */}
+              {/* <TextField label="Evaluation" fullWidth margin="normal" /> */}
+              <Button variant="contained" color="primary" type="submit" fullWidth>
+                Submit
+              </Button>
+            </form>
           </DialogContent>
         </Dialog>
       </main>
