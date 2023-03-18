@@ -21,10 +21,10 @@ import {
 
 function Copyright() {
   return (
-    <Typography variant="body2" color="text.secondary" align="center">
+    <Typography variant="body2" color="white" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
+      <Link color="inherit" href="https://github.com/42seoul-coalition-hackathon-2023/NICEWEATHER" target="_blank" rel="noopener">
+        NICE WEATHER
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -33,7 +33,7 @@ function Copyright() {
 }
 
 function getPhotoLinkByLevel(level) {
-  level = 4;
+  // level = 3;
   let ret;
   // if (level === 1)
   //   ret = "https://source.unsplash.com/random/300x300/?desert?branch";
@@ -45,14 +45,34 @@ function getPhotoLinkByLevel(level) {
   //   ret = "https://source.unsplash.com/random/300x300/?fine";
   
   ret = `/`;
+
+  // if (level === 1)
+  //   ret += `drought.jpeg`;
+  // else if (level === 2)
+  // ret += `sprout.jpeg`;
+  // else if (level === 3)
+  //   ret += `little_tree.jpeg`;
+  // else if (level === 4)
+  //   ret += `tree.jpeg`;
+
+  // if (level === 1)
+  //   ret += `branch_level1.jpg`;
+  // else if (level === 2)
+  // ret += `branch_level2.jpg`;
+  // else if (level === 3)
+  // ret += `branch_level3.jpg`;
+  // else if (level === 4)
+  // ret += `branch_level4.jpg`;
+
   if (level === 1)
-    ret += `drought.jpeg`;
+    ret += `thunder.png`;
   else if (level === 2)
-  ret += `sprout.jpeg`;
+  ret += `rain.png`;
   else if (level === 3)
-    ret += `little_tree.jpeg`;
+  ret += `sun clouds.png`;
   else if (level === 4)
-    ret += `tree.jpeg`;
+  ret += `Sun.png`;
+    
   // console.log(`ret: ${ret}`);
   return ret;
 }
@@ -122,15 +142,25 @@ export default function EvaluationWeather() {
 
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}> 
       <CssBaseline />
+        <Box
+        sx={{
+          // backgroundImage: `url(/etienne-girardet-sPAY2trdWzg-unsplash.jpeg)`,
+          // backgroundRepeat: 'no-repeat',
+          // backgroundSize: 'cover',
+          // minHeight: '100vh',
+          // zIndex: 1,
+        }}
+      >
       <main>
         {/* Hero unit */}
         <Box
           sx={{
-            bgcolor: 'background.paper',
+            // bgcolor: 'background.paper', // 이거 지우니까 기존에 백그라운그 이미지를 가렸던게 없어졌다.
             pt: 8,
             pb: 0,
+            // backgroundImage: `url(/tree.jpeg)`,
           }}
         >
           <Container maxWidth="sm">
@@ -140,11 +170,12 @@ export default function EvaluationWeather() {
               align="center"
               color="text.primary"
               gutterBottom
+              style={{ fontSize: '40px' }}
             >
-              NICE WEATHER
+              Evaluation Weather
             </Typography>
             <Typography variant="h5" align="center" color="text.secondary" paragraph>
-              42seoul Evaluation Meteorological Administration
+              42seoul EMA
             </Typography>
           </Container>
         </Box>
@@ -161,14 +192,16 @@ export default function EvaluationWeather() {
                   <CardMedia
                     component="img"
                     sx={{
+                      backgroundColor: weatherInfo[1].level >= 3 ? 'skyblue' : 'black',
                       // 16:9
-                      //pt: '56.25%',
+                      // pt: '56.25%',
+                      pt: '40px',
+                      pb: '40px',
                     }}
                     image={
                         getPhotoLinkByLevel(weatherInfo[1].level)
                       }
                     alt="weather image"
-                    // alt="random"
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h2">
@@ -223,21 +256,36 @@ export default function EvaluationWeather() {
         </Dialog>
       </main>
       {/* Footer */}
-      <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
-        <Typography variant="h6" align="center" gutterBottom>
-          Footer
+      <Box sx={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        width: '100%',
+        bgcolor: 'black',//'background.paper', 
+        p: 3,
+        // backgroundImage: `url(/etienne-girardet-sPAY2trdWzg-unsplash.jpeg)`,
+        // backgroundRepeat: 'no-repeat',
+        // backgroundSize: 'cover',
+        // minHeight: '100vh',
+        // zIndex: 1,
+       }} 
+        component="footer">
+        <Typography variant="h6" align="center" gutterBottom color='white'>
+          Evaluation Weather
         </Typography>
         <Typography
           variant="subtitle1"
           align="center"
-          color="text.secondary"
+          // color="text.secondary"
           component="p"
+          color="white"
         >
-          Something here to give the footer a purpose!
+          42Seoul Evaluation Meteorological Administration
         </Typography>
         <Copyright />
       </Box>
       {/* End footer */}
+      </Box>  
     </ThemeProvider>
   );
 }
