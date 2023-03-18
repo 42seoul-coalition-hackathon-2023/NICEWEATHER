@@ -6,7 +6,7 @@ import { MainService } from './main.service';
 export class MainController {
     constructor(private mainService: MainService) {}
 
-    @Cron('0 0/5 * * * *')
+    @Cron('0 0/1 * * * *')
     async updateData() {
         await this.mainService.getApi(new Date(Date.now()));
     }
