@@ -18,6 +18,6 @@ export class MainController {
 
     @Post('/')
     async evaluationReserve(@Body('mail') mail: string, @Body('time') time: Date) {
-        return this.mainService.setAlarm(mail, time);
+        return this.mainService.setAlarm(mail, new Date(time));
     }
 }

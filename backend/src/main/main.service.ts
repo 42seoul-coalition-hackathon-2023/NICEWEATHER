@@ -85,17 +85,20 @@ export class MainService {
         if (!this.checkMailFormat(mail)) {
             ret['error'] = 'Setting alarm fail';
             ret['message'] = 'e-mail format is incorrect';
+            console.log(now + ' : set alarm error(e-mail format)' + mail);
             return ret;
         }
         if (time <= now) {
             ret['error'] = 'Setting alarm fail';
             ret['message'] = `Can't be set alarm on past time`;
+            console.log(now + ' : set alarm error(past time)' + time);
             return ret;
         }
         let founds = await this.mailRepository.findBy({mail: mail});
         if (founds && founds.filter((alarm) => alarm.time === time).length != 0) {
             ret['error'] = 'Setting alarm fail';
             ret['message'] = 'Already be set on the time as same e-mail';
+            console.log(now + ' : set alarm error(duplication)');
             return ret;
         }
         console.log(now + ' : set alarm');
