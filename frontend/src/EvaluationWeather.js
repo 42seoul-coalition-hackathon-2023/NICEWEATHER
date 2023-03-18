@@ -11,6 +11,14 @@ import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  Button,
+} from '@mui/material';
+
 function Copyright() {
   return (
     <Typography variant="body2" color="text.secondary" align="center">
@@ -37,7 +45,7 @@ function getPhotoLinkByLevel(level) {
   return ret;
 }
 
-const cards = [1, 2, 3, 4, 5, 6];
+// const cards = [1, 2, 3, 4, 5, 6];
 
 const theme = createTheme();
 
@@ -55,6 +63,19 @@ export default function EvaluationWeather() {
 
   const weatherInfos = Object.entries(weathers);
   console.log(weatherInfos);
+
+
+  const [openDialog, setOpenDialog] = useState(false);
+  // const [selectedWeatherInfo, setSelectedWeatherInfo] = useState(null);
+
+  const handleGridItemClick = (weatherInfo) => {
+    // setSelectedWeatherInfo(weatherInfo);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -87,7 +108,9 @@ export default function EvaluationWeather() {
           {/* End hero unit */}
           <Grid container spacing={2}>
             {weatherInfos.map((weatherInfo) => (
-              <Grid item key={weatherInfo[0]} xs={12} sm={2} md={2}>
+              <Grid item key={weatherInfo[0]} xs={12} sm={2} md={2}
+              onClick={() => handleGridItemClick(weatherInfo)}
+              sx={{ cursor: 'pointer' }}>
                 <Card
                   sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
@@ -122,6 +145,16 @@ export default function EvaluationWeather() {
             ))}
           </Grid>
         </Container>
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>{"Enter your evaluation"}</DialogTitle>
+          <DialogContent>
+            <TextField label="Your name" fullWidth margin="normal" />
+            <TextField label="Evaluation" fullWidth margin="normal" />
+            <Button variant="contained" color="primary" fullWidth>
+              Submit
+            </Button>
+          </DialogContent>
+        </Dialog>
       </main>
       {/* Footer */}
       <Box sx={{ bgcolor: 'background.paper', p: 6 }} component="footer">
