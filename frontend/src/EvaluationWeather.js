@@ -80,15 +80,28 @@ export default function EvaluationWeather() {
   const [email, setEmail] = useState('');
 
   const handleEmailChange = (event) => {
+    console.log("event.target.value: ", event.target.value);
     setEmail(event.target.value);
   };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
+    // console.log(event);
+    // const formData = new FormData(event.target);
+
+    // const email = formData.get('email');
+    // const rating = formData.get('rating');
+    // const date = new Date();
+    
+    // console.log('email:', email); // check that email is being retrieved correctly
+    // console.log('rating:', rating); // check that rating is being retrieved correctly
+    
+    // const evaluationData = { email, rating};
+    // console.log('rating:', rating); // check that rating is being retrieved correctly
+    
     const reservationData = {
       time: new Date(selectedWeatherInfo?.[1]?.date),
-      mail: formData.get('email'),
+      mail: email,
     };
     const responseOfPost = axios.post('http://localhost:4000/main/', reservationData);
     handleCloseDialog();
