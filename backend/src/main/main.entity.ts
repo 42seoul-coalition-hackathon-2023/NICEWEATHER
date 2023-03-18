@@ -17,4 +17,22 @@ export class Weather {
     @Column()
     @NotEquals(null)
     level: number;
+
+    @Column()
+    @NotEquals(null)
+    last_slot: number;
+}
+
+@Entity()
+export class Mail {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    @NotEquals(null)
+    mail: string;
+
+    @Column()
+    @NotEquals(null)
+    time: Date;
 }

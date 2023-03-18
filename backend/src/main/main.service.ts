@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Weather } from './main.entity';
+import { Mail, Weather } from './main.entity';
 import { Repository } from 'typeorm';
-import { number } from 'joi';
 
 @Injectable()
 export class MainService {
@@ -12,10 +11,12 @@ export class MainService {
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
         @InjectRepository(Weather)
-        private weatherRepository: Repository<Weather> 
+        private weatherRepository: Repository<Weather>,
+        @InjectRepository(Mail)
+        private mailRepository: Repository<Mail>
     ) {}
 
-    async getAccessToken() {
+    private async getAccessToken() {
         const url = this.configService.get('TOKEN_URL');
         const body = {
             grant_type:this.configService.get('GRANT_TYPE'),
@@ -29,12 +30,12 @@ export class MainService {
         return response.data.access_token;
     }
 
-    dateTimeMove(date: Date, time_move: number): Date {
+    private dateTimeMove(date: Date, time_move: number): Date {
         let new_date = new Date(date.getTime() + (1000 * 60 * 60 * time_move))
         return new_date;
     }
 
-    getFormattedDate(date: Date): string {
+    private getFormattedDate(date: Date): string {
         let year = date.getFullYear();
         let month = date.getMonth() + 1;
         let day = date.getDate();
@@ -45,12 +46,114 @@ export class MainService {
         return str;
     }
 
+    private getLevel(count: number): number {
+        let level: number;
+        if (count < 30)
+            level = 1;
+        else if (count < 60)
+            level = 2;
+        else if (count < 100)
+            level = 3;
+        else
+            level = 4;
+        return level;
+    }
+
+    private getLastSlot(data) {
+        let last_slot = 0;
+        let key_count = data.length;
+        
+        for (let i = 0; i < key_count; i++) {
+            if (last_slot < data[i]['id']) {
+                last_slot = data[i]['id'];
+            }
+        }
+        return last_slot;
+    }
+
+    private checkMailFormat(mail: string) {
+        const expression: RegExp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+        return expression.test(mail);
+    }
+
+    async setAlarm(mail: string, time: Date) {
+        let ret = {};
+        let now = new Date(Date.now())
+
+        now.setMinutes(0, 0, 0);
+        time.setMinutes(0, 0, 0);
+        if (!this.checkMailFormat(mail)) {
+            ret['error'] = 'Setting alarm fail';
+            ret['message'] = 'e-mail format is incorrect';
+            return ret;
+        }
+        if (time <= now) {
+            ret['error'] = 'Setting alarm fail';
+            ret['message'] = `Can't be set alarm on past time`;
+            return ret;
+        }
+        let founds = await this.mailRepository.findBy({mail: mail});
+        if (founds && founds.filter((alarm) => alarm.time === time).length != 0) {
+            ret['error'] = 'Setting alarm fail';
+            ret['message'] = 'Already be set on the time as same e-mail';
+            return ret;
+        }
+        console.log(now + ' : set alarm');
+        await this.mailRepository.save({mail: mail, time: time});
+        console.log('\tset alarm at ' + mail + ' on ' + time);
+    }
+
+    private async sendMail(date: Date) {
+        date.setMinutes(0, 0, 0);
+        let founds = await this.mailRepository.findBy({time: date});
+        if (founds.length != 0) {
+            console.log(new Date(Date.now()) + ' : send mail');
+            console.log(this.configService.get('EMAIL_ID'));
+            const mailer = require('nodemailer');
+            const transporter = mailer.createTransport({
+                service: 'gmail',
+                host: 'smtp@gmail.com',
+                port: 465,
+                auth: {
+                    user: this.configService.get('EMAIL_ID'),
+                    pass: this.configService.get('EMAIL_PASS'),
+                },
+                secure: true,
+            });
+            const sendMail = (email) => {
+                let mailOptions = {
+                    to: email,
+                    subject: '42Weather Slot alarm',
+                    text: 'New slot is opened on ' 
+                        + date.toDateString()
+                        + date.getHours()
+                        + '!!!',
+                };
+                transporter.sendMail(mailOptions, function(err, info) {
+                    if (err)
+                        console.log(err);
+                    else
+                        console.log(email + ': ' + info.response);
+                });
+            }
+            const mail = [];
+            founds.forEach((found) => {
+                mail.push(found.mail);
+                this.mailRepository.delete({id: found.id});
+            });
+            mail.forEach((person) => {
+                sendMail(person);
+                console.log('\tsend email to ' + person);
+            });
+        }
+    }
+
     async getApi(date: Date) {
         const token = await this.getAccessToken();
         const headers = { 'Authorization': `Bearer ${token}` };
         
-        console.log((date) + ' : get api');
-        date = this.dateTimeMove(date, -3);
+        console.log(date + ' : get api');
+        date = this.dateTimeMove(date, -2);
         for (let i = 0; i < 6; i++) {
             date.setMinutes(0, 0, 0);
             let from = this.getFormattedDate(this.dateTimeMove(date, -9));
@@ -58,23 +161,19 @@ export class MainService {
             let to = this.getFormattedDate(this.dateTimeMove(date, -9));
             const url = this.configService.get('API_URL') + '?filter[campus_id]=29' + `&range[begin_at]=${from},${to}`;
             const response = await this.httpService.get(url, {headers}).toPromise();
-            let count = Object.keys(response.data).length;
-            let level: number;
-            if (count < 30)
-                level = 1;
-            else if (count < 60)
-                level = 2;
-            else if (count < 100)
-                level = 3;
-            else
-                level = 4;
+            let count = response.data.length;
+            let last_slot = this.getLastSlot(response.data);
             let found = await this.weatherRepository.findOneBy({time: date});
-            if (!found)
+            if (found) {
+                // if (last_slot > found.last_slot)
+                    this.sendMail(date);
                 await this.weatherRepository.delete({time: date});
+            }
             const new_data = this.weatherRepository.create({
                 time: date,
                 count: count,
-                level: level
+                level: this.getLevel(count),
+                last_slot: last_slot,
             });
             await this.weatherRepository.save(new_data);
             date = this.dateTimeMove(date, 1);
@@ -84,24 +183,31 @@ export class MainService {
     async getWeatherData(date: Date) {
         let ret = {};
         
-        date.setMinutes(45, 0, 0);
-        console.log((date) + ' : get weather data');
-        let found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, -3)});
-        if (!found)
-            await this.getApi(this.dateTimeMove(date, -3));
-        found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, 2)});
-        if (!found)
-            await this.getApi(this.dateTimeMove(date, 2));
-        date = this.dateTimeMove(date, -3);
-        for (let i = 0; i < 6; i++) {
-            let found = await this.weatherRepository.findOneBy({time: date});
-            ret[i] = {
-                date: found.time,
-                level: found.level,
-                count: found.count,
+        try {
+            console.log(date + ' : get weather data');
+            date.setMinutes(45, 0, 0);
+            let found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, -3)});
+            if (!found)
+                await this.getApi(this.dateTimeMove(date, -2));
+            found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, 2)});
+            if (!found)
+                await this.getApi(this.dateTimeMove(date, 3));
+            found = await this.weatherRepository.findOneBy({time: date});
+            date = this.dateTimeMove(date, -2);
+            for (let i = 0; i < 6; i++) {
+                let found = await this.weatherRepository.findOneBy({time: date});
+                ret[i] = {
+                    date: found.time,
+                    level: found.level,
+                    count: found.count,
+                }
+                date = this.dateTimeMove(date, 1);
             }
-            date = this.dateTimeMove(date, 1);
+        } catch (error) {
+            ret['error'] = 'Getting weather fail';
+            ret['message'] = 'fail to find weather data';
+        } finally {
+            return ret;
         }
-        return ret;
     }
 }
