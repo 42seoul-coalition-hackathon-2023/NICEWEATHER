@@ -33,15 +33,27 @@ function Copyright() {
 }
 
 function getPhotoLinkByLevel(level) {
+  level = 4;
   let ret;
+  // if (level === 1)
+  //   ret = "https://source.unsplash.com/random/300x300/?desert?branch";
+  // else if (level === 2)
+  //   ret = "https://source.unsplash.com/random/300x300/?dry";
+  // else if (level === 3)
+  //   ret = "https://source.unsplash.com/random/300x300/?tree";
+  // else if (level === 4)
+  //   ret = "https://source.unsplash.com/random/300x300/?fine";
+  
+  ret = `/`;
   if (level === 1)
-    ret = "https://source.unsplash.com/random/300x300/?desert?branch";
+    ret += `drought.jpeg`;
   else if (level === 2)
-    ret = "https://source.unsplash.com/random/300x300/?dry";
+  ret += `sprout.jpeg`;
   else if (level === 3)
-    ret = "https://source.unsplash.com/random/300x300/?tree";
+    ret += `little_tree.jpeg`;
   else if (level === 4)
-    ret = "https://source.unsplash.com/random/300x300/?fine";
+    ret += `tree.jpeg`;
+  // console.log(`ret: ${ret}`);
   return ret;
 }
 
@@ -84,7 +96,7 @@ export default function EvaluationWeather() {
     setEmail(event.target.value);
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
     // console.log(event);
     // const formData = new FormData(event.target);
@@ -103,7 +115,8 @@ export default function EvaluationWeather() {
       time: new Date(selectedWeatherInfo?.[1]?.date),
       mail: email,
     };
-    const responseOfPost = axios.post('http://localhost:4000/main/', reservationData);
+    const responseOfPost = await axios.post('http://localhost:4000/main/', reservationData);
+    console.log("responseOfPost:", responseOfPost);
     handleCloseDialog();
   };
 
@@ -154,7 +167,8 @@ export default function EvaluationWeather() {
                     image={
                         getPhotoLinkByLevel(weatherInfo[1].level)
                       }
-                    alt="random"
+                    alt="weather image"
+                    // alt="random"
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h2">
@@ -164,11 +178,11 @@ export default function EvaluationWeather() {
                         new Date(weatherInfo[1].date).getHours() + "시"
                       }
                     </Typography>
-                    <Typography>
+                    {/* <Typography>
                       {"level: " + weatherInfo[1].level}
-                    </Typography>
+                    </Typography> */}
                     <Typography>
-                      {"count: " + weatherInfo[1].count}
+                      {"평가 지수: " + weatherInfo[1].count}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -182,7 +196,15 @@ export default function EvaluationWeather() {
             <form onSubmit={handleFormSubmit}>
               <Typography variant="subtitle1" gutterBottom>
                 {"Selected time: " +
-                  new Date(selectedWeatherInfo?.[1]?.date).toLocaleString()}
+                  new Date(selectedWeatherInfo?.[1]?.date).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour12: false,
+                    hour: 'numeric',
+                    timeZone: 'Asia/Seoul',
+                  })
+                  }
               </Typography>
               <TextField
                 label="Your email"
