@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { MainService } from './main.service';
 
@@ -18,6 +18,12 @@ export class MainController {
 
     @Post('/')
     async evaluationReserve(@Body('mail') mail: string, @Body('time') time: Date) {
-        return this.mainService.setAlarm(mail, new Date(time));
+        let date = new Date(time);
+
+        date.setMinutes(0, 0, 0);
+        let err = await this.mainService.checkAlarmValidation(mail, date);
+        if (err)
+            throw new BadRequestException(err);
+        await this.mainService.setAlarm(mail, date);
     }
 }
