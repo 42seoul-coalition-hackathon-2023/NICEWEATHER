@@ -76,6 +76,18 @@ export class MainService {
         return expression.test(mail);
     }
 
+    private checkMailDuplication(founds: Mail[], time: Date) {
+        for (let found of founds) {
+            let t = found.time;
+            if (t.getFullYear() == time.getFullYear()
+                && t.getMonth() == time.getMonth()
+                && t.getDate() == time.getDate()
+                && t.getHours() == time.getHours())
+                return true;
+        }
+        return false;
+    }
+
     async checkAlarmValidation(mail: string, time: Date) {
         let now = new Date(Date.now())
 
@@ -89,7 +101,7 @@ export class MainService {
             return `Can't be set alarm on past time`;
         }
         let founds = await this.mailRepository.findBy({mail: mail});
-        if (founds && founds.filter((alarm) => alarm.time === time).length != 0) {
+        if (founds && this.checkMailDuplication(founds, time)) {
             console.log(now + ' : set alarm error(duplication)');
             return 'Already be set on the time as same e-mail';
         }
@@ -189,7 +201,7 @@ export class MainService {
                 await this.getApi(this.dateTimeMove(date, -2));
             found = await this.weatherRepository.findOneBy({time: this.dateTimeMove(date, 2)});
             if (!found)
-                await this.getApi(this.dateTimeMove(date, 3));
+                await this.getApi(this.dateTimeMove(date, 4));
             found = await this.weatherRepository.findOneBy({time: date});
             date = this.dateTimeMove(date, -2);
             for (let i = 0; i < 6; i++) {
