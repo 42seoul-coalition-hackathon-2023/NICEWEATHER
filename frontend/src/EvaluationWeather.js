@@ -10,7 +10,6 @@ import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
-
 import {
   Dialog,
   DialogTitle,
@@ -19,61 +18,53 @@ import {
   Button,
 } from '@mui/material';
 
+function getBackgroundGifByAverageLevel(weathers) {
+  let sum = 0;
+  for (let key in weathers) {
+    sum += weathers[key].count;
+  }
+  let avg = sum / Object.keys(weathers).length;
+  // console.log(`avg: ${avg}`);
+
+  // avg = 31;
+
+  let ret;
+  // Lv1 미만 30 Lv2 미만 60 Lv3 미만 100 Lv4
+  if (avg < 30)
+    ret = `background_thunder.gif`;
+  else if (avg < 60)
+    ret = `background_rain1.gif`;
+  else if (avg < 100)
+    ret = `b34.gif`;
+  else
+    ret = `background_sunny.gif`;
+  return (ret);
+}
+
 function Copyright() {
   return (
     <Typography variant="body2" color="white" align="center">
-      {'Copyright © '}
+      {''}
       <Link color="inherit" href="https://github.com/42seoul-coalition-hackathon-2023/NICEWEATHER" target="_blank" rel="noopener">
         NICE WEATHER
       </Link>{' '}
-      {new Date().getFullYear()}
+      - 42Seoul Coalition Hackathon 2023
       {'.'}
     </Typography>
   );
 }
 
 function getPhotoLinkByLevel(level) {
-  // level = 3;
-  let ret;
-  // if (level === 1)
-  //   ret = "https://source.unsplash.com/random/300x300/?desert?branch";
-  // else if (level === 2)
-  //   ret = "https://source.unsplash.com/random/300x300/?dry";
-  // else if (level === 3)
-  //   ret = "https://source.unsplash.com/random/300x300/?tree";
-  // else if (level === 4)
-  //   ret = "https://source.unsplash.com/random/300x300/?fine";
-  
-  ret = `/`;
-
-  // if (level === 1)
-  //   ret += `drought.jpeg`;
-  // else if (level === 2)
-  // ret += `sprout.jpeg`;
-  // else if (level === 3)
-  //   ret += `little_tree.jpeg`;
-  // else if (level === 4)
-  //   ret += `tree.jpeg`;
-
-  // if (level === 1)
-  //   ret += `branch_level1.jpg`;
-  // else if (level === 2)
-  // ret += `branch_level2.jpg`;
-  // else if (level === 3)
-  // ret += `branch_level3.jpg`;
-  // else if (level === 4)
-  // ret += `branch_level4.jpg`;
+  let ret = `/`;
 
   if (level === 1)
-    ret += `thunder.png`;
+    ret += `thunder22.png`;
   else if (level === 2)
-  ret += `rain.png`;
+    ret += `rain22.png`;
   else if (level === 3)
-  ret += `sun clouds.png`;
+    ret += `cloud sunny22.png`;
   else if (level === 4)
-  ret += `Sun.png`;
-    
-  // console.log(`ret: ${ret}`);
+    ret += `sunny22.png`;
   return ret;
 }
 
@@ -96,21 +87,93 @@ export default function EvaluationWeather() {
   const weatherInfos = Object.entries(weathers);
   console.log(weatherInfos);
 
+  // Lv1 미만 30 Lv2 미만 60 Lv3 미만 100 Lv4
+
+  // for (let key in weatherInfos) {
+  //   console.log(weatherInfos[key][1].date);
+  //   if (key == 0) {
+  //     weatherInfos[key][1].count = 92;
+  //     weatherInfos[key][1].level = 3;
+  //   }
+  //   else if (key == 1) {
+  //     weatherInfos[key][1].count = 109;
+  //     weatherInfos[key][1].level = 4;
+  //   }
+  //   else if (key == 2) {
+  //     weatherInfos[key][1].count = 96;
+  //     weatherInfos[key][1].level = 3;
+  //   }
+  //   else if (key == 3) {
+  //     weatherInfos[key][1].count = 113;
+  //     weatherInfos[key][1].level = 4;
+  //   }
+  //   else if (key == 4) {
+  //     weatherInfos[key][1].count = 125;
+  //     weatherInfos[key][1].level = 4;
+  //   }
+  //   else if (key == 5) {
+  //     weatherInfos[key][1].count = 89;
+  //     weatherInfos[key][1].level = 3;
+  //   }
+  //   else {
+  //     weatherInfos[key][1].count = 90;
+  //     weatherInfos[key][1].level = 3;
+  //   }
+
+  //   // weatherInfos[key][1].count = 100;
+  //   // weatherInfos[key][1].level = 4;
+  // }
+
+  // for (let key in weatherInfos) {
+  //   console.log(weatherInfos[key][1].date);
+  //   if (key == 0) {
+  //     weatherInfos[key][1].count = 10;
+  //     weatherInfos[key][1].level = 1;
+  //   }
+  //   else if (key == 1) {
+  //     weatherInfos[key][1].count = 39;
+  //     weatherInfos[key][1].level = 2;
+  //   }
+  //   else if (key == 2) {
+  //     weatherInfos[key][1].count = 99;
+  //     weatherInfos[key][1].level = 3;
+  //   }
+  //   else if (key == 3) {
+  //     weatherInfos[key][1].count = 200;
+  //     weatherInfos[key][1].level = 4;
+  //   }
+  //   else if (key == 4) {
+  //     weatherInfos[key][1].count = 25;
+  //     weatherInfos[key][1].level = 1;
+  //   }
+  //   else if (key == 5) {
+  //     weatherInfos[key][1].count = 59;
+  //     weatherInfos[key][1].level = 2;
+  //   }
+  //   else {
+  //     weatherInfos[key][1].count = 99;
+  //     weatherInfos[key][1].level = 3;
+  //   }
+
+  //   // weatherInfos[key][1].count = 100;
+  //   // weatherInfos[key][1].level = 4;
+  // }
+
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [selectedWeatherInfo, setSelectedWeatherInfo] = useState(null);
 
   const handleGridItemClick = (weatherInfo) => {
+    setErrorMessage('');
     setSelectedWeatherInfo(weatherInfo);
     setOpenDialog(true);
   };
-
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
 
   const [email, setEmail] = useState('');
-
   const handleEmailChange = (event) => {
     console.log("event.target.value: ", event.target.value);
     setEmail(event.target.value);
@@ -118,28 +181,31 @@ export default function EvaluationWeather() {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    // console.log(event);
-    // const formData = new FormData(event.target);
-
-    // const email = formData.get('email');
-    // const rating = formData.get('rating');
-    // const date = new Date();
-    
-    // console.log('email:', email); // check that email is being retrieved correctly
-    // console.log('rating:', rating); // check that rating is being retrieved correctly
-    
-    // const evaluationData = { email, rating};
-    // console.log('rating:', rating); // check that rating is being retrieved correctly
-    
     const reservationData = {
-      time: new Date(selectedWeatherInfo?.[1]?.date),
+      time: selectedWeatherInfo?.[1]?.date,
       mail: email,
     };
-    const responseOfPost = await axios.post('http://localhost:4000/main/', reservationData);
-    console.log("responseOfPost:", responseOfPost);
-    handleCloseDialog();
+    try {
+      const responseOfPost = await axios.post('http://localhost:4000/main/', reservationData);
+      // Handle successful response
+      console.log("responseOfPost:", responseOfPost);
+      handleCloseDialog();
+    } catch (error) {
+      
+      if (error.response) {
+        console.log('Error status code:', error.response.status);
+        console.log('Error message:', error.response.data);
+        setErrorMessage(error.response.data.message);
+        // Handle error response
+      } else if (error.request) {
+        console.log('No response received:', error.request);
+        // Handle no response error
+      } else {
+        console.log('Error occurred:', error.message);
+        // Handle other errors
+      }
+    }
   };
-
 
   return (
     <ThemeProvider theme={theme}> 
@@ -147,10 +213,11 @@ export default function EvaluationWeather() {
         <Box
         sx={{
           // backgroundImage: `url(/etienne-girardet-sPAY2trdWzg-unsplash.jpeg)`,
-          // backgroundRepeat: 'no-repeat',
-          // backgroundSize: 'cover',
-          // minHeight: '100vh',
-          // zIndex: 1,
+          backgroundImage: `url(/${getBackgroundGifByAverageLevel(weathers)})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          minHeight: '100vh',
+          zIndex: 1,
         }}
       >
       <main>
@@ -166,16 +233,16 @@ export default function EvaluationWeather() {
           <Container maxWidth="sm">
             <Typography
               component="h1"
-              variant="h2"
+              variant="h4"
               align="center"
               color="text.primary"
               gutterBottom
               style={{ fontSize: '40px' }}
             >
-              Evaluation Weather
+              NICE WEATHER
             </Typography>
-            <Typography variant="h5" align="center" color="text.secondary" paragraph>
-              42seoul EMA
+            <Typography variant="h4" align="center" color="text.secondary" paragraph>
+              42Seoul EMA
             </Typography>
           </Container>
         </Box>
@@ -194,9 +261,11 @@ export default function EvaluationWeather() {
                     sx={{
                       backgroundColor: weatherInfo[1].level >= 3 ? 'skyblue' : 'black',
                       // 16:9
-                      // pt: '56.25%',
-                      pt: '40px',
-                      pb: '40px',
+                      pt: '10%',
+                      pb: '10%',
+                      // pt: '20px',
+                      // pb: '20px',
+                      // height: '61.8%',
                     }}
                     image={
                         getPhotoLinkByLevel(weatherInfo[1].level)
@@ -211,9 +280,6 @@ export default function EvaluationWeather() {
                         new Date(weatherInfo[1].date).getHours() + "시"
                       }
                     </Typography>
-                    {/* <Typography>
-                      {"level: " + weatherInfo[1].level}
-                    </Typography> */}
                     <Typography>
                       {"평가 지수: " + weatherInfo[1].count}
                     </Typography>
@@ -223,12 +289,12 @@ export default function EvaluationWeather() {
             ))}
           </Grid>
         </Container>
-        <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <Dialog open={openDialog} onClose={handleCloseDialog} minWidth="md" maxWidth="md">
           <DialogTitle>{"평가 알림 신청"}</DialogTitle>
           <DialogContent>
             <form onSubmit={handleFormSubmit}>
               <Typography variant="subtitle1" gutterBottom>
-                {"Selected time: " +
+                {"선택 시간대: " +
                   new Date(selectedWeatherInfo?.[1]?.date).toLocaleString('ko-KR', {
                     year: 'numeric',
                     month: 'numeric',
@@ -240,7 +306,7 @@ export default function EvaluationWeather() {
                   }
               </Typography>
               <TextField
-                label="Your email"
+                label="이메일"
                 fullWidth
                 margin="normal"
                 value={email}
@@ -248,6 +314,11 @@ export default function EvaluationWeather() {
               />
               {/* <TextField label="Your name" fullWidth margin="normal" /> */}
               {/* <TextField label="Evaluation" fullWidth margin="normal" /> */}
+              {errorMessage && (
+                <Typography color="error" variant="body1" align="center">
+                  {errorMessage}
+                </Typography>
+              )}
               <Button variant="contained" color="primary" type="submit" fullWidth>
                 Submit
               </Button>
@@ -270,9 +341,9 @@ export default function EvaluationWeather() {
         // zIndex: 1,
        }} 
         component="footer">
-        <Typography variant="h6" align="center" gutterBottom color='white'>
-          Evaluation Weather
-        </Typography>
+        {/* <Typography variant="h6" align="center" gutterBottom color='white'>
+          NICE WEATHER
+        </Typography> */}
         <Typography
           variant="subtitle1"
           align="center"
