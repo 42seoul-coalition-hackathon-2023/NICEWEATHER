@@ -42,8 +42,8 @@ function Copyright() {
 // eslint-disable-next-line
 function modifyWeatherInfosSunny(weatherInfos) {
   for (let key in weatherInfos) {
-    console.log(weatherInfos[key][1].date);
-    console.log(typeof(key));
+    // console.log(weatherInfos[key][1].date);
+    // console.log(typeof(key));
     // eslint-disable-next-line
     if (key == 0) {
       weatherInfos[key][1].date = new Date(2023, 3, 19, 14);
@@ -87,7 +87,7 @@ function modifyWeatherInfosSunny(weatherInfos) {
 // eslint-disable-next-line
 function modifyWeatherInfosEvenly(weatherInfos) {
   for (let key in weatherInfos) {
-    console.log(weatherInfos[key][1].date);
+    // console.log(weatherInfos[key][1].date);
     // eslint-disable-next-line
     if (key == 0) {
       weatherInfos[key][1].count = 10;
@@ -166,13 +166,13 @@ export default function EvaluationWeather() {
   // console.log(weatherInfos);
 
   /* TEST */
-  modifyWeatherInfosSunny(weatherInfos);
+  // modifyWeatherInfosSunny(weatherInfos);
   // modifyWeatherInfosEvenly(weatherInfos);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedWeatherInfo, setSelectedWeatherInfo] = useState(null);
-  const handleGridItemClick = (weatherInfo) => {
+  const handleCardItemClick = (weatherInfo) => {
     setErrorMessage('');
     setSelectedWeatherInfo(weatherInfo);
     setOpenDialog(true);
@@ -225,7 +225,6 @@ export default function EvaluationWeather() {
         }}
       >
       <main>
-        {/* Hero unit */}
         <Box
           sx={{
             pt: 8,
@@ -244,22 +243,21 @@ export default function EvaluationWeather() {
               NICE WEATHER
             </Typography>
             <Typography variant="h4" align="center" color="text.secondary" paragraph>
-              42SEOUL - EMA
+              42SEOUL EMA
             </Typography>
           </Container>
         </Box>
         <Container sx={{ py: 8 }} maxWidth="xl">
-          {/* End hero unit */}
           <Grid container spacing={2}>
             {weatherInfos.map((weatherInfo) => (
               <Grid
                 item key={weatherInfo[0]}
                 xs={12} sm={2} md={2}
-                onClick={() => handleGridItemClick(weatherInfo)}
-                sx={{ cursor: 'pointer' }}
               >
                 <Card
-                  sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                  onClick={() => handleCardItemClick(weatherInfo)}
+                  sx={{ height: '100%', display: 'flex', 
+                        flexDirection: 'column', cursor: 'pointer' }}
                 >
                   <CardMedia
                     component="img"
