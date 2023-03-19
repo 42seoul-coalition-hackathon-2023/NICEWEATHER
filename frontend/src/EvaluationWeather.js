@@ -45,11 +45,12 @@ function Copyright() {
   return (
     <Typography variant="body2" color="white" align="center">
       {''}
+      Coalition Hackathon 2023 -
+      {' '}
       <Link color="inherit" href="https://github.com/42seoul-coalition-hackathon-2023/NICEWEATHER" target="_blank" rel="noopener">
         NICE WEATHER
-      </Link>{' '}
-      - 42Seoul Coalition Hackathon 2023
-      {'.'}
+      </Link>
+      {''}
     </Typography>
   );
 }
@@ -67,8 +68,6 @@ function getPhotoLinkByLevel(level) {
     ret += `sunny22.png`;
   return ret;
 }
-
-// const cards = [1, 2, 3, 4, 5, 6];
 
 const theme = createTheme();
 
@@ -92,26 +91,32 @@ export default function EvaluationWeather() {
   // for (let key in weatherInfos) {
   //   console.log(weatherInfos[key][1].date);
   //   if (key == 0) {
+  //     weatherInfos[key][1].date = new Date(2023, 3, 19, 14);
   //     weatherInfos[key][1].count = 92;
   //     weatherInfos[key][1].level = 3;
   //   }
   //   else if (key == 1) {
+  //     weatherInfos[key][1].date = new Date(2023, 3, 19, 15);
   //     weatherInfos[key][1].count = 109;
   //     weatherInfos[key][1].level = 4;
   //   }
   //   else if (key == 2) {
+  //     weatherInfos[key][1].date = new Date(2023, 3, 19, 16);
   //     weatherInfos[key][1].count = 96;
   //     weatherInfos[key][1].level = 3;
   //   }
   //   else if (key == 3) {
+  //     weatherInfos[key][1].date = new Date(2023, 3, 19, 17);
   //     weatherInfos[key][1].count = 113;
   //     weatherInfos[key][1].level = 4;
   //   }
   //   else if (key == 4) {
+  //     weatherInfos[key][1].date = new Date(2023, 3, 19, 18);
   //     weatherInfos[key][1].count = 125;
   //     weatherInfos[key][1].level = 4;
   //   }
   //   else if (key == 5) {
+  //     weatherInfos[key][1].date = new Date(2023, 3, 19, 19);
   //     weatherInfos[key][1].count = 89;
   //     weatherInfos[key][1].level = 3;
   //   }
@@ -159,7 +164,6 @@ export default function EvaluationWeather() {
   //   // weatherInfos[key][1].level = 4;
   // }
 
-
   const [openDialog, setOpenDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedWeatherInfo, setSelectedWeatherInfo] = useState(null);
@@ -175,7 +179,7 @@ export default function EvaluationWeather() {
 
   const [email, setEmail] = useState('');
   const handleEmailChange = (event) => {
-    console.log("event.target.value: ", event.target.value);
+    // console.log("event.target.value: ", event.target.value);
     setEmail(event.target.value);
   };
 
@@ -187,22 +191,22 @@ export default function EvaluationWeather() {
     };
     try {
       const responseOfPost = await axios.post('http://localhost:4000/main/', reservationData);
-      // Handle successful response
       console.log("responseOfPost:", responseOfPost);
       handleCloseDialog();
     } catch (error) {
-      
       if (error.response) {
-        console.log('Error status code:', error.response.status);
-        console.log('Error message:', error.response.data);
-        setErrorMessage(error.response.data.message);
+        // console.log('Error status code:', error.response.status);
+        // console.log('Error message:', error.response.data);
         // Handle error response
+        setErrorMessage(error.response.data.message);
       } else if (error.request) {
-        console.log('No response received:', error.request);
+        // console.log('No response received:', error.request);
         // Handle no response error
+        setErrorMessage('No response');
       } else {
         console.log('Error occurred:', error.message);
         // Handle other errors
+        setErrorMessage(error.message);
       }
     }
   };
@@ -212,7 +216,6 @@ export default function EvaluationWeather() {
       <CssBaseline />
         <Box
         sx={{
-          // backgroundImage: `url(/etienne-girardet-sPAY2trdWzg-unsplash.jpeg)`,
           backgroundImage: `url(/${getBackgroundGifByAverageLevel(weathers)})`,
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
@@ -227,7 +230,6 @@ export default function EvaluationWeather() {
             // bgcolor: 'background.paper', // 이거 지우니까 기존에 백그라운그 이미지를 가렸던게 없어졌다.
             pt: 8,
             pb: 0,
-            // backgroundImage: `url(/tree.jpeg)`,
           }}
         >
           <Container maxWidth="sm">
@@ -320,7 +322,7 @@ export default function EvaluationWeather() {
                 </Typography>
               )}
               <Button variant="contained" color="primary" type="submit" fullWidth>
-                Submit
+                신청
               </Button>
             </form>
           </DialogContent>
